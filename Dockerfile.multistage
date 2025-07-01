@@ -6,7 +6,7 @@ RUN R -e "options(Ncpus = parallel::detectCores()); \
     if(!require('ggplot2')) install.packages('ggplot2');" && \
     rm -rf /tmp/downloaded_packages/
 
-FROM r-base:4.3
+FROM r-base:4.3.0
 
 LABEL maintainer="emmanueltan2000@gmail.com" \
       description="deltaTE: Detection of translationally regulated genes" \
