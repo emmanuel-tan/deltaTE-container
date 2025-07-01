@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 r-base:4.3.0
+FROM --platform=linux/arm64/v8 r-base:4.3.0
 
 LABEL maintainer="emmanueltan2000@gmail.com" \
       description="deltaTE: Detection of translationally regulated genes" \
