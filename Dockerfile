@@ -7,9 +7,7 @@ RUN R -e "options(Ncpus = parallel::detectCores()); \
 
 FROM r-base:4.3.0
 
-LABEL maintainer="emmanueltan2000@gmail.com" \
-      description="Minimal deltaTE image" \
-      version="1.0.0"
+LABEL maintainer="emmanueltan2000@gmail.com"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
