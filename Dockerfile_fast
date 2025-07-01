@@ -6,7 +6,8 @@ LABEL maintainer="emmanueltan2000@gmail.com" \
 
 RUN R -e "\
     options(Ncpus = parallel::detectCores()); \
-    if(!require('apeglm')) BiocManager::install('apeglm', ask=FALSE); \
+    if(!require('BiocManager')) install.packages('BiocManager'); \
+    BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE); \
     if(!require('ggplot2')) install.packages('ggplot2'); \
     " && rm -rf /tmp/downloaded_packages/
 
