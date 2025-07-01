@@ -1,4 +1,4 @@
-FROM r-base:4.3.0
+FROM --platform=linux/amd64 r-base:4.3.0
 
 LABEL maintainer="emmanueltan2000@gmail.com" \
       description="deltaTE: Detection of translationally regulated genes" \
@@ -17,22 +17,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtiff5-dev \
     libjpeg-dev \
     build-essential \
-    gfortran
+    gfortran \
+    pkg-config \
+    cmake \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# Test R installation
-RUN R --version
+# Set environment variables for R
+ENV DEBIAN_FRONTEND=noninteractive
+ENV R_LIBS_USER=/usr/local/lib/R/site-library
+ENV TZ=UTC
 
-# Install BiocManager first
-RUN R -e "if(!require('BiocManager')) install.packages('BiocManager')"
+# Configure R with proper settings
+RUN echo "options(repos = c(CRAN = 'https://cloud.r-project.org'))" >> /usr/local/lib/R/etc/Rprofile.site && \
+    echo "options(timeout = 600)" >> /usr/local/lib/R/etc/Rprofile.site && \
+    echo "Sys.setenv(TZ = 'UTC')" >> /usr/local/lib/R/etc/Rprofile.site
 
-# Install Bioconductor packages
-RUN R -e "BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE)"
+# Install BiocManager
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
 
-# Install CRAN packages
-RUN R -e "if(!require('ggplot2')) install.packages('ggplot2')"
+# Install Bioconductor packages with explicit version
+RUN R -e "BiocManager::install(version = '3.18')" && \
+    R -e "BiocManager::install('DESeq2', ask=FALSE, update=FALSE)" && \
+    R -e "BiocManager::install('apeglm', ask=FALSE, update=FALSE)"
 
-# Basic cleanup
-RUN rm -rf /tmp/* && rm -rf /var/lib/apt/lists/*
+# Install ggplot2
+RUN R -e "install.packages('ggplot2', repos='https://cloud.r-project.org')"
+
+# Verify installations
+RUN R -e "library(DESeq2); library(apeglm); library(ggplot2); sessionInfo()"
+
+# Clean up
+RUN rm -rf /tmp/* /var/tmp/*
 
 WORKDIR /app
 COPY scripts/DTEG.R /app/
