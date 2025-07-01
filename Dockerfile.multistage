@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libmpfr6 \
     liblapack3 \
     libblas3 \
-    libgomp1 \
+    libgomp1
 
 COPY --from=builder /usr/local/lib/R/site-library /usr/local/lib/R/site-library
 
