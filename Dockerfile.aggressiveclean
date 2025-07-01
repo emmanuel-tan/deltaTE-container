@@ -12,7 +12,7 @@ RUN R -e "options(Ncpus = parallel::detectCores()); \
     rm -rf /tmp/downloaded_packages/
 
 # ULTRA-AGGRESSIVE cleanup - this will break some functionality but drastically reduce size
-RUN # Remove ALL documentation, examples, and non-essential files
+RUN # Remove ALL documentation, examples, and non-essential files \
     find /usr/local/lib/R -name "help" -type d -exec rm -rf {} + 2>/dev/null || true && \
     find /usr/local/lib/R -name "html" -type d -exec rm -rf {} + 2>/dev/null || true && \
     find /usr/local/lib/R -name "doc" -type d -exec rm -rf {} + 2>/dev/null || true && \
