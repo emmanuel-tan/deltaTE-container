@@ -25,9 +25,11 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
+        file: Dockerfile_fast
         context: .
         push: true
         tags: |
-            ${{ secrets.DOCKER_USERNAME }}/deltate:latest
-            ${{ secrets.DOCKER_USERNAME }}/deltate:${{ github.sha }}
-        platforms: linux/amd64
+            ${{ secrets.DOCKER_USERNAME }}/deltate:latest-lite
+        platforms: |
+            - linux/amd64
+            - linux/arm64

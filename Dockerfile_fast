@@ -1,0 +1,19 @@
+FROM bioconductor/bioconductor_docker:RELEASE_3_18
+
+LABEL maintainer="emmanueltan2000@gmail.com" \
+      description="deltaTE: Detection of translationally regulated genes" \
+      version="1.0.0"
+
+RUN R -e "\
+    options(Ncpus = parallel::detectCores()); \
+    if(!require('apeglm')) BiocManager::install('apeglm', ask=FALSE); \
+    if(!require('ggplot2')) install.packages('ggplot2'); \
+    " && rm -rf /tmp/downloaded_packages/
+
+WORKDIR /app
+COPY scripts/DTEG.R /app/
+RUN chmod +x /app/DTEG.R && chown dteguser:dteguser /app/DTEG.R
+
+USER dteguser
+
+ENTRYPOINT ["Rscript", "/app/DTEG.R"]
