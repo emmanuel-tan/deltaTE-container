@@ -1,54 +1,42 @@
-FROM --platform=linux/arm64/v8 r-base:4.3.0
+FROM bioconductor/bioconductor_docker:RELEASE_3_18
 
 LABEL maintainer="emmanueltan2000@gmail.com" \
       description="deltaTE: Detection of translationally regulated genes" \
       version="1.0.0"
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    libgit2-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    build-essential \
-    gfortran \
-    pkg-config \
-    cmake \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+# Install only the packages you need (same as your original)
+RUN R -e "options(Ncpus = parallel::detectCores()); \
+    if(!require('BiocManager')) install.packages('BiocManager'); \
+    BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE); \
+    if(!require('ggplot2')) install.packages('ggplot2');" && \
+    rm -rf /tmp/downloaded_packages/
 
-# Set environment variables for R
-ENV DEBIAN_FRONTEND=noninteractive
-ENV R_LIBS_USER=/usr/local/lib/R/site-library
-ENV TZ=UTC
-
-# Configure R with proper settings
-RUN echo "options(repos = c(CRAN = 'https://cloud.r-project.org'))" >> /usr/local/lib/R/etc/Rprofile.site && \
-    echo "options(timeout = 600)" >> /usr/local/lib/R/etc/Rprofile.site && \
-    echo "Sys.setenv(TZ = 'UTC')" >> /usr/local/lib/R/etc/Rprofile.site
-
-# Install BiocManager
-RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')"
-
-# Install Bioconductor packages with explicit version
-RUN R -e "BiocManager::install(version = '3.18')" && \
-    R -e "BiocManager::install('DESeq2', ask=FALSE, update=FALSE)" && \
-    R -e "BiocManager::install('apeglm', ask=FALSE, update=FALSE)"
-
-# Install ggplot2
-RUN R -e "install.packages('ggplot2', repos='https://cloud.r-project.org')"
-
-# Verify installations
-RUN R -e "library(DESeq2); library(apeglm); library(ggplot2); sessionInfo()"
-
-# Clean up
-RUN rm -rf /tmp/* /var/tmp/*
+# Multi-stage cleanup to reduce image size significantly
+RUN apt-get autoremove -y && \
+    apt-get autoclean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/* && \
+    rm -rf /var/tmp/* && \
+    # Remove R package documentation and help files
+    find /usr/local/lib/R/site-library -name "help" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R/site-library -name "html" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R/site-library -name "doc" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R/site-library -name "demo" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R/site-library -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R/site-library -name "*.tar.gz" -delete && \
+    # Remove system documentation and man pages
+    rm -rf /usr/share/man/* && \
+    rm -rf /usr/share/doc/* && \
+    rm -rf /usr/share/info/* && \
+    # Remove most locales (keep en_US)
+    find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name 'en_US*' ! -name 'en@*' ! -name 'locale.alias' -exec rm -rf {} + 2>/dev/null || true && \
+    # Clean package cache and logs
+    find /var/cache -type f -delete 2>/dev/null || true && \
+    find /var/log -name "*.log" -delete 2>/dev/null || true && \
+    # Remove development files
+    find /usr/local/lib/R -name "*.o" -delete 2>/dev/null || true && \
+    # Strip binaries (reduce size)
+    find /usr/local/lib/R -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
 
 WORKDIR /app
 COPY scripts/DTEG.R /app/
