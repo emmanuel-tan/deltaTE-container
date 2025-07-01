@@ -16,3 +16,17 @@ COPY scripts/DTEG.R /app/
 RUN chmod +x /app/DTEG.R
 
 ENTRYPOINT ["Rscript", "/app/DTEG.R"]
+
+docker run --rm \
+  --platform=linux/amd64 \
+  -v $(pwd)/examples/data:/data \
+  -w /data \
+  107laserfish/deltate:latest-lite ribo_counts.txt rna_counts.txt sample_info.txt 1
+
+
+docker run --rm -it \
+  --platform=linux/amd64 \
+  -v $(pwd)/examples/data:/data \
+  -w /data \
+  --entrypoint bash \
+  107laserfish/deltate:latest-lite

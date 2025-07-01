@@ -1,0 +1,43 @@
+FROM bioconductor/bioconductor_docker:RELEASE_3_18 as builder
+
+RUN R -e "options(Ncpus = parallel::detectCores()); \
+    if(!require('BiocManager')) install.packages('BiocManager'); \
+    BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE); \
+    if(!require('ggplot2')) install.packages('ggplot2');" && \
+    rm -rf /tmp/downloaded_packages/
+
+FROM r-base:4.3
+
+LABEL maintainer="emmanueltan2000@gmail.com" \
+      description="deltaTE: Detection of translationally regulated genes" \
+      version="1.0.0"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libcurl4 \
+    libssl3 \
+    libxml2 \
+    libgsl27 \
+    libgmp10 \
+    libmpfr6 \
+    liblapack3 \
+    libblas3 \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /usr/local/lib/R/site-library /usr/local/lib/R/site-library
+
+COPY --from=builder /usr/local/lib/R/library /usr/local/lib/R/library
+
+RUN R -e "library(DESeq2); library(apeglm); library(ggplot2)" && \
+    find /usr/local/lib/R -name "help" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R -name "html" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R -name "doc" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R -name "demo" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /usr/local/lib/R -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf /tmp/*
+
+WORKDIR /app
+COPY scripts/DTEG.R /app/
+RUN chmod +x /app/DTEG.R
+
+ENTRYPOINT ["Rscript", "/app/DTEG.R"]

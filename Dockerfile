@@ -23,9 +23,3 @@ COPY scripts/DTEG.R /app/
 RUN chmod +x /app/DTEG.R
 
 ENTRYPOINT ["Rscript", "/app/DTEG.R"]
-
-# docker run --rm \
-#   --platform=linux/amd64 \
-#   -v $(pwd)/examples:/data \
-#   -w /data \
-#   delta-te ribo_counts.txt rna_counts.txt sample_info.txt 1
