@@ -1,0 +1,45 @@
+FROM r-base:4.3
+
+LABEL maintainer="emmanueltan2000@gmail.com" \
+      description="deltaTE: Detection of translationally regulated genes" \
+      version="1.0.0"
+
+RUN apt-get update && apt-get install -y \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libgit2-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    && R -e "\
+    options(Ncpus = parallel::detectCores()); \
+    options(repos = c(CRAN = 'https://cran.r-project.org')); \
+    if(!require('BiocManager')) install.packages('BiocManager', clean=TRUE); \
+    BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE, clean=TRUE); \
+    if(!require('ggplot2')) install.packages('ggplot2', clean=TRUE); \
+    " \
+    && rm -rf /tmp/* \
+    && rm -rf /var/tmp/* \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/local/lib/R/site-library/*/help \
+    && rm -rf /usr/local/lib/R/site-library/*/html \
+    && rm -rf /usr/local/lib/R/site-library/*/doc \
+    && rm -rf /usr/local/lib/R/site-library/*/demo \
+    && rm -rf /usr/local/lib/R/site-library/*/tests \
+    && apt-get purge -y \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libgit2-dev \
+    && apt-get autoremove -y \
+    && apt-get autoclean
+
+WORKDIR /app
+COPY scripts/DTEG.R /app/
+RUN chmod +x /app/DTEG.R
+
+ENTRYPOINT ["Rscript", "/app/DTEG.R"]
