@@ -25,11 +25,11 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
-        file: Dockerfile.optimised.singlestage
+        file: Dockerfile.aggressiveclean
         context: .
         push: true
         tags: |
-            ${{ secrets.DOCKER_USERNAME }}/deltate:optimised.single.stage
+            ${{ secrets.DOCKER_USERNAME }}/deltate:aggressiveclean
         platforms: |
             linux/amd64
             linux/arm64
