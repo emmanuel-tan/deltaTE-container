@@ -28,6 +28,6 @@ jobs:
         context: .
         push: true
         tags: |
-            ${{ secrets.DOCKER_USERNAME }}/deltaTE:latest
-            ${{ secrets.DOCKER_USERNAME }}/deltaTE:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/deltate:latest
+            ${{ secrets.DOCKER_USERNAME }}/deltate:${{ github.sha }}
         platforms: linux/amd64
