@@ -31,5 +31,5 @@ jobs:
         tags: |
             ${{ secrets.DOCKER_USERNAME }}/deltate:latest-lite
         platforms: |
-            - linux/amd64
-            - linux/arm64
+            linux/amd64
+            linux/arm64
