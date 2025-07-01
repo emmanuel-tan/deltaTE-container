@@ -1,0 +1,12 @@
+.git/
+.github/
+docs/
+examples/
+tests/
+*.md
+.DS_Store
+node_modules/
+*.log
+results/
+data/
+docs/
