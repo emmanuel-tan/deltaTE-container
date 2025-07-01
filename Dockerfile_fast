@@ -12,8 +12,6 @@ RUN R -e "\
 
 WORKDIR /app
 COPY scripts/DTEG.R /app/
-RUN chmod +x /app/DTEG.R && chown dteguser:dteguser /app/DTEG.R
-
-USER dteguser
+RUN chmod +x /app/DTEG.R
 
 ENTRYPOINT ["Rscript", "/app/DTEG.R"]
