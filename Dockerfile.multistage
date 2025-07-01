@@ -5,7 +5,7 @@ RUN R -e "options(Ncpus = parallel::detectCores()); \
     BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE); \
     install.packages('ggplot2');"
 
-FROM r-base:4.3.0-slim
+FROM r-base:4.3.0
 
 LABEL maintainer="emmanueltan2000@gmail.com" \
       description="Minimal deltaTE image" \
