@@ -4,7 +4,8 @@ LABEL maintainer="emmanueltan2000@gmail.com" \
       description="deltaTE: Detection of translationally regulated genes" \
       version="1.0.0"
 
-RUN apt-get update && apt-get install -y \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
@@ -16,31 +17,22 @@ RUN apt-get update && apt-get install -y \
     libtiff5-dev \
     libjpeg-dev \
     build-essential \
-    gfortran \
-    && R -e "\
-    options(Ncpus = parallel::detectCores()); \
-    options(repos = c(CRAN = 'https://cran.r-project.org')); \
-    if(!require('BiocManager')) install.packages('BiocManager', clean=TRUE); \
-    BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE, clean=TRUE); \
-    if(!require('ggplot2')) install.packages('ggplot2', clean=TRUE); \
-    " \
-    && rm -rf /tmp/* \
-    && rm -rf /var/tmp/* \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /usr/local/lib/R/site-library/*/help \
-    && rm -rf /usr/local/lib/R/site-library/*/html \
-    && rm -rf /usr/local/lib/R/site-library/*/doc \
-    && rm -rf /usr/local/lib/R/site-library/*/demo \
-    && rm -rf /usr/local/lib/R/site-library/*/tests \
-    && apt-get purge -y \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    libgit2-dev \
-    build-essential \
-    gfortran \
-    && apt-get autoremove -y \
-    && apt-get autoclean
+    gfortran
+
+# Test R installation
+RUN R --version
+
+# Install BiocManager first
+RUN R -e "if(!require('BiocManager')) install.packages('BiocManager')"
+
+# Install Bioconductor packages
+RUN R -e "BiocManager::install(c('DESeq2', 'apeglm'), ask=FALSE)"
+
+# Install CRAN packages
+RUN R -e "if(!require('ggplot2')) install.packages('ggplot2')"
+
+# Basic cleanup
+RUN rm -rf /tmp/* && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY scripts/DTEG.R /app/
