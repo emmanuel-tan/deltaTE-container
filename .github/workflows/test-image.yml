@@ -43,7 +43,7 @@ jobs:
         run: |
           docker run --rm \
             -v "$EXAMPLES_DIR:/home/ruser/examples" \
-            -v "$OUTPUT_DIR:/home/ruser/results" \
+            -v "$OUTPUT_DIR:/home/ruser/Results" \
             "$IMAGE_NAME" \
             /home/ruser/examples/ribo_counts.txt \
             /home/ruser/examples/rna_counts.txt \
